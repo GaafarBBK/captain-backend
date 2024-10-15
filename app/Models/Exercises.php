@@ -7,5 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Exercises extends Model
 {
+    protected $fillable =['name', 'description', 'target_muscle', 'equipment','sets', 'reps' , 'status', 'isPublic'];
     use HasFactory;
 }

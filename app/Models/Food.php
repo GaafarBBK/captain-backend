@@ -7,5 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Food extends Model
 {
+    protected $fillable = ['name', 'quantity', 'calories', 'portion', 'carbs', 'protein', 'isPublic'];
     use HasFactory;
 }

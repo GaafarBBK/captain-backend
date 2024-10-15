@@ -7,5 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Reminder extends Model
 {
+    protected $fillable = ['dateTime', 'message'];
     use HasFactory;
 }

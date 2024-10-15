@@ -7,5 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class CaptainSubscribers extends Model
 {
+    protected $fillable = ['isActive', 'start_date', 'end_date'];
     use HasFactory;
 }

@@ -7,5 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class CaptainSubscription extends Model
 {
+    protected $fillable = ['duration_in_weeks', 'price', 'isAvailable'];
     use HasFactory;
 }

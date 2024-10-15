@@ -15,7 +15,13 @@ return new class extends Migration
         Schema::create('ath_body_infos', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class);
-            
+            $table->enum('gender', ['male','female']);
+            $table->integer('age');
+            $table->integer('weight');
+            $table->integer('height');
+            $table->enum('ath_lvl', ['Rookie','Beginner','Intermediate','Advanced']);
+            $table->enum('ath_goal', ['Gain Weight','Lose Weight','Get Fitter','Gain More Flexibility','Build Muscle']);
+            $table->enum('ath_body', ['Skinny','Athletic','Muscular']);
             $table->timestamps();
         });
     }

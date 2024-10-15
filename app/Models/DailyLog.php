@@ -7,5 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class DailyLog extends Model
 {
+    protected $fillable = ['day_date', 'steps','calories'];
     use HasFactory;
 }
