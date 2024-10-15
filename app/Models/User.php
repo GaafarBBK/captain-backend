@@ -28,6 +28,11 @@ class User extends Authenticatable
 
     ];
 
+
+    public function captain(){
+        return $this->hasOne(Captain::class);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
