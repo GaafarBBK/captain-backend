@@ -9,4 +9,8 @@ class Nutritions extends Model
 {
     protected $fillable = ['date', 'total_protein', 'total_carbs', 'total_calories', 'notes'];
     use HasFactory;
+
+    public function meals(){
+        return $this->hasMany(Meals::class);
+    }
 }

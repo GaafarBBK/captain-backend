@@ -9,4 +9,8 @@ class CaptainSubscribers extends Model
 {
     protected $fillable = ['isActive', 'start_date', 'end_date'];
     use HasFactory;
+
+    public function captain(){
+        return $this->belongsTo(Captain::class);
+    }
 }

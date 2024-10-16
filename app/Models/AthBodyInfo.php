@@ -9,4 +9,8 @@ class AthBodyInfo extends Model
 {
     protected $fillable = ['height', 'weight','gender','age','ath_lvl','ath_goal','ath_body'];
     use HasFactory;
+
+    public function athlete(){
+        return $this->belongsTo(User::class);
+    }
 }

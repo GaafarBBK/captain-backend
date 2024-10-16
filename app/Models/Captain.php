@@ -13,6 +13,12 @@ class Captain extends Model
         'experience',
     ];
 
-    
+    public function subscribers(){
+        return $this->hasMany(CaptainSubscribers::class);
+    }
+
+    public function subscription(){
+        return $this->hasMany(CaptainSubscription::class);
+    }
    
 }

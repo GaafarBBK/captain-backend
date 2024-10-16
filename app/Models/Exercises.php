@@ -9,4 +9,8 @@ class Exercises extends Model
 {
     protected $fillable =['name', 'description', 'target_muscle', 'equipment','sets', 'reps' , 'status', 'isPublic'];
     use HasFactory;
+
+    public function workout(){
+        return $this->belongsTo(Workout::class);
+    }
 }

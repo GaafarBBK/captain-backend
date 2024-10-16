@@ -29,9 +29,15 @@ class User extends Authenticatable
     ];
 
 
-    public function captain(){
-        return $this->hasOne(Captain::class);
+    public function dailylogs(){
+        return $this->hasMany(DailyLog::class);
     }
+
+    public function AthBodyInfo()
+    {
+        return $this->hasOne(AthBodyInfo::class);
+    }
+
 
     /**
      * The attributes that should be hidden for serialization.

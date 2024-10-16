@@ -9,4 +9,8 @@ class CaptainSubscription extends Model
 {
     protected $fillable = ['duration_in_weeks', 'price', 'isAvailable'];
     use HasFactory;
+
+    public function captain(){
+        return $this->belongsTo(Captain::class);
+    }
 }
