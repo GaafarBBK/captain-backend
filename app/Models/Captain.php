@@ -13,6 +13,10 @@ class Captain extends Model
         'experience',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
     public function subscribers(){
         return $this->hasMany(CaptainSubscribers::class);
     }

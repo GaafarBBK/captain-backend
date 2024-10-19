@@ -65,15 +65,22 @@ class CaptainSubscriptionsController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Subscription updated successfully'
+            'message' => 'Subscription updated successfully',
+            'id' => $subscription->id,
         ], 201);
     } 
-    
+
+                                
 
     // not finished
     public function destroy($id)
     {
-        auth('api')->user()->Captain->CaptainSubscription->where('id', $id)->delete();
+        auth('api')->user()->captain()->CaptainSubscription->where('id', $id)->delete();
+
+        return response()->json([
+            'message' => 'Subscription deleted successfully'
+        ], 200);
+
     }
 
 

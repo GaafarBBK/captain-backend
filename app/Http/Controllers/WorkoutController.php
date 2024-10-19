@@ -10,7 +10,5 @@ class WorkoutController extends Controller
     {
         
     }
-    {
-
-    }
+   
 }

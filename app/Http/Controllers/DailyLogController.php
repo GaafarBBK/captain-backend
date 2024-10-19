@@ -49,7 +49,4 @@ class DailyLogController extends Controller
         ]);
     }
 
-
-
-    
 }

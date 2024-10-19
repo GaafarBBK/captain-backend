@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AthBodyInfo;
+use App\Models\Captain;
 use App\Models\User;
 use Illuminate\Http\Client\ResponseSequence;
 use Illuminate\Http\Request;
@@ -10,25 +12,18 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-   public function login(Request $request)
-   {
-       $request->validate([
-           'email' => ['required','string'],
-           'password' => ['required','string'],
-       ]);
-
-       $credentials = request(['email', 'password']);
-
-       if (!$token = auth('api')->attempt($credentials)) {
-           return response()->json(['error' => 'Unauthorized'], 401);
-        } 
+    public function login(Request $request){
+        
+        $credentials = request(['email', 'password']);
+        if(!$token = auth()->attempt($credentials)){
+            return response()->json(['status'=> 'error']);
+        }
         return response()->json([
-            'token' => $token,
+            'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60
+            'expires_in' => auth()->factory()->getTTL() * 60
         ]);
-
-   }
+    }
 
 
    public function store(Request $request){
@@ -37,22 +32,64 @@ class UserController extends Controller
         'name' => ['required','string'],
         'email' => ['required','string','unique:users,email'],
         'password' => ['required','string'],
-        'avatar_url' => ['nullable','string'],
-        'phone_number' => ['nullable','integer'],
-        'bio' => ['nullable','string'],
+        'avatar_url' => ['string','nullable'] ,
+        'phone_number' => ['integer','nullable'] ,
+        'bio' => ['string','nullable']  ,
+        'role' => ['required','string','in:captain,athlete'] ,
+        'experience' => ['string','nullable',],
+        'gender' => ['string','nullable','in:male,female'],
+        'age' => ['integer','nullable'],
+        'weight' => ['integer','nullable'],
+        'height' => ['integer','nullable'],
+        'ath_lvl' => ['string','nullable','in:Rookie,Beginner,Intermediate,Advanced'],
+        'ath_goal' => ['string','nullable','in:Gain Weight,Lose Weight,Get Fitter,Gain More Flexibility,Build Muscle'],
+
     ]);
 
-    User::create([
+    $kk = User::create([
         'name' => $newAcc['name'],
         'email' => $newAcc['email'],
         'password' => Hash::make($newAcc['password']),
-        'avatar_url' => $newAcc['avatar_url'],
-        'phone_number' => $newAcc['phone_number'],
-        'bio' => $newAcc['bio'],
+        'avatar_url' => $newAcc['avatar_url'] ?? null,
+        'phone_number' => $newAcc['phone_number'] ?? null,
+        'bio' => $newAcc['bio'] ?? null,
     ]);
+    
+    
+    
+    if ($newAcc['role'] == 'captain') {
+        print($kk);
+        print($newAcc['experience']);
+        Captain::create([
+            'user_id' => $kk->id,
+            'experience' => $newAcc['experience'] 
+        ]);
+    } else {
+        $this->storeathlete($kk->id,$newAcc['gender'],$newAcc['age'],$newAcc['weight'],
+        $newAcc['height'],$newAcc['ath_lvl'],$newAcc['ath_goal']);
+    }
 
     return response()->json(['message' => 'User created successfully'], 201);
    }
+
+
+//    public function storecaptain($id,$experience)
+//    {
+    
+//    }
+
+   public function storeathlete($id,$gender,$age,$weight,$height,$ath_lvl,$ath_goal)
+   {
+        AthBodyInfo::create([
+            'user_id' => $id,
+            'gender'=> $gender,
+            'age' => $age,
+            'weight' => $weight,
+            'height' => $height,
+            'ath_lvl' => $ath_lvl,
+            'ath_goal' => $ath_goal,
+        ]);
+    }
 
    public function update(Request $request)
    {
@@ -72,7 +109,9 @@ class UserController extends Controller
    public function getUser()
    {
         return response()-> json([
-            'user' => auth('api')->user()
+            'role' => auth('api')->user()->captain() ? 'Captain':'Athelete',
+            'user info' => auth('api')->user(),
+            
         ]);
        
    }
@@ -93,7 +132,6 @@ class UserController extends Controller
          ]);
    }
 
-   // destroy method
 
    
 

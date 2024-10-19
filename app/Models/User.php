@@ -28,7 +28,11 @@ class User extends Authenticatable
 
     ];
 
-
+    public function captain()
+    {
+        return $this->hasOne(Captain::class);
+    }
+    
     public function dailylogs(){
         return $this->hasMany(DailyLog::class);
     }
