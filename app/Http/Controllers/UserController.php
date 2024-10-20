@@ -13,6 +13,11 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     public function login(Request $request){
+
+        $request->validate([
+            'email' => ['required','string'],
+            'password' => ['required','string'],
+        ]);
         
         $credentials = request(['email', 'password']);
         if(!$token = auth()->attempt($credentials)){
@@ -43,6 +48,7 @@ class UserController extends Controller
         'height' => ['integer','nullable'],
         'ath_lvl' => ['string','nullable','in:Rookie,Beginner,Intermediate,Advanced'],
         'ath_goal' => ['string','nullable','in:Gain Weight,Lose Weight,Get Fitter,Gain More Flexibility,Build Muscle'],
+        'ath_body' => ['string','nullable','in:Skinny,Athletic,Muscular'],
 
     ]);
 
@@ -58,38 +64,26 @@ class UserController extends Controller
     
     
     if ($newAcc['role'] == 'captain') {
-        print($kk);
-        print($newAcc['experience']);
         Captain::create([
             'user_id' => $kk->id,
             'experience' => $newAcc['experience'] 
         ]);
     } else {
-        $this->storeathlete($kk->id,$newAcc['gender'],$newAcc['age'],$newAcc['weight'],
-        $newAcc['height'],$newAcc['ath_lvl'],$newAcc['ath_goal']);
+        AthBodyInfo::create([
+            'user_id' => $kk->id,
+            'gender'=> $newAcc['gender'],
+            'age' => $newAcc['age'],
+            'weight' => $newAcc['weight'],
+            'height' => $newAcc['height'],
+            'ath_lvl' => $newAcc['ath_lvl'],
+            'ath_goal' => $newAcc['ath_goal'],
+            'ath_body' => $newAcc['ath_body'],
+        ]);
     }
 
     return response()->json(['message' => 'User created successfully'], 201);
    }
 
-
-//    public function storecaptain($id,$experience)
-//    {
-    
-//    }
-
-   public function storeathlete($id,$gender,$age,$weight,$height,$ath_lvl,$ath_goal)
-   {
-        AthBodyInfo::create([
-            'user_id' => $id,
-            'gender'=> $gender,
-            'age' => $age,
-            'weight' => $weight,
-            'height' => $height,
-            'ath_lvl' => $ath_lvl,
-            'ath_goal' => $ath_goal,
-        ]);
-    }
 
    public function update(Request $request)
    {
@@ -103,13 +97,15 @@ class UserController extends Controller
 
         auth('api')->user()->update($newData);
 
-        return response()->json(['message' => 'Profile updated successfully'], 200);
+        return response()->json([
+            'message' => 'Profile updated successfully'
+        ], 200);
    }
 
    public function getUser()
    {
         return response()-> json([
-            'role' => auth('api')->user()->captain() ? 'Captain':'Athelete',
+            'role' => auth('api')->user()->captain() ? 'captain':'athelete',
             'user info' => auth('api')->user(),
             
         ]);

@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class AthBodyInfo extends Model
 {
-    protected $fillable = ['height', 'weight','gender','age','ath_lvl','ath_goal','ath_body'];
+    protected $fillable = ['height', 'user_id', 'weight','gender','age','ath_lvl','ath_goal','ath_body'];
     use HasFactory;
 
-    public function athlete(){
+    public function user(){
         return $this->belongsTo(User::class);
     }
 }

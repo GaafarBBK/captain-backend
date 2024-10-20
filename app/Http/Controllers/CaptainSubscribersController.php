@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 class CaptainSubscribersController extends Controller
 {
 
-    // not finished
     public function buySubscription(Request $request)
     {
         $request->validate([
@@ -22,12 +21,14 @@ class CaptainSubscribersController extends Controller
 
         CaptainSubscribers::create([
             'user_id' => auth('api')->user()->id,
-            //'captain_id' => 
+            'captain_id' => CaptainSubscription::find($request->subscription_id)->captain_id,
             'subscription_id' => $request->subscription_id,
             'isActive' => true,
             'start_date' => now(),
             'end_date' => now()->addWeeks(CaptainSubscription::find($request->subscription_id)->duration_in_weeks),
         ]);
+
+        return response()->json(['message' => 'Subscription bought successfully'], 201);
 
     }
 }

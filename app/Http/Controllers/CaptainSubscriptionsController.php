@@ -11,15 +11,16 @@ class CaptainSubscriptionsController extends Controller
     {
         $request->validate([
             'duration_in_weeks' => ['required', 'integer'],
-            'price' => ['required', 'integar'],
+            'price' => ['required', 'integer'],
             'isAvailable' => ['boolean'],
         ]);
+
 
         if (!auth('api')->user()->Captain->id){
             return response()->json(['error' => 'User is NOT a captain'], 401);
         }
 
-        CaptainSubscription::create([
+        $subscription = CaptainSubscription::create([
             'captain_id' => auth('api')->user()->Captain->id,
             'duration_in_weeks' => $request->duration_in_weeks,
             'price' => $request->price,
@@ -27,7 +28,8 @@ class CaptainSubscriptionsController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Subscription created successfully'
+            'message' => 'Subscription created successfully',
+            'subscription' => $subscription
         ], 201);
         
     }

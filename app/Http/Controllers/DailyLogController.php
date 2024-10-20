@@ -28,7 +28,7 @@ class DailyLogController extends Controller
         (
 [
                 'ath_id' => auth('api')->user()->id,
-                'day_date' => Carbon::today()->toDateString(),
+                'day_date' => today()->toDateString(),
                 'steps' => $request->steps,
                 'calories' => $this->calcCalories($request->steps, auth('api')->user()->AthBodyInfo->weight),
             ]

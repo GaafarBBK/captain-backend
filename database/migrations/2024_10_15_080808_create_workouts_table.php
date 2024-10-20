@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(User::class);
             $table->string('title');
             $table->date('date');
-            $table->enum('status', ['Pending','Completed']);
+            $table->enum('status', ['Pending','Completed'])->default('Pending');
             
             $table->timestamps();
         });

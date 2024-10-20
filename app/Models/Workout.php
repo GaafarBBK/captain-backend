@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Workout extends Model
 {
-    protected $fillable = ['title', 'date','status'];
+    protected $fillable = ['user_id','captain_id','title', 'date','status'];
     use HasFactory;
 
     public function exercises(){
-        return $this->hasMany(Exercises ::class);
+        return $this->belongsToMany(Exercises::class);
     }   
 }

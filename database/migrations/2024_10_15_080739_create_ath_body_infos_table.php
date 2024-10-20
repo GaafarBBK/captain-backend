@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('ath_body_infos', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class);
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->enum('gender', ['male','female']);
             $table->integer('age');
             $table->integer('weight');

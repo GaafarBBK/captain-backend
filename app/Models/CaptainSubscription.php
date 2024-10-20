@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CaptainSubscription extends Model
 {
-    protected $fillable = ['duration_in_weeks', 'price', 'isAvailable'];
+    protected $fillable = ['duration_in_weeks', 'captain_id', 'price', 'isAvailable'];
     use HasFactory;
 
     public function captain(){

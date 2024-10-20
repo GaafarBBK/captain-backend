@@ -11,6 +11,6 @@ class Exercises extends Model
     use HasFactory;
 
     public function workout(){
-        return $this->belongsTo(Workout::class);
+        return $this->belongsToMany(Workout::class);
     }
 }

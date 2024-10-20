@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Captain;
 
 return new class extends Migration
 {
@@ -12,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('captain_subscriptions', function (Blueprint $table) {
+        Schema::create('exercises_workouts', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Captain::class);
-            $table->integer('duration_in_weeks');
-            $table->integer('price');
-            $table->boolean('isAvailable')->default(true);
+            $table->foreignId('exercises_id')->constrained()->onDelete('cascade');
+            $table->foreignId('workout_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('captain_subscriptions');
+        Schema::dropIfExists('exercises_workouts');
     }
 };
