@@ -40,6 +40,28 @@ class ExercisesController extends Controller
     }
 
 
+    public function searchExercises(Request $request)
+    {
+        $request->validate([
+            'name' => ['string'],
+            'target_muscle' => ['string'],
+            'equipment' => ['string'],
+            'isPublic' => ['boolean'],
+        ]);
+
+        $exercises = Exercises::where('name', 'like', '%'.$request->name.'%')
+            ->where('target_muscle', 'like', '%'.$request->target_muscle.'%')
+            ->where('equipment', 'like', '%'.$request->equipment.'%')
+            ->where('isPublic', $request->isPublic)
+            ->get();
+
+        return response()->json([
+            'exercises' => $exercises
+        ]);
+
+    }
+
+
     public function attachExercises(Request $request)
     {
         $workout = Workout::find($request->workout_id);
@@ -63,9 +85,9 @@ class ExercisesController extends Controller
             'workout' => $workout
         ]);
     }
-    {
-        
-    }
+      
+    
+    
 
     
 }
