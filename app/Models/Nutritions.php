@@ -13,4 +13,8 @@ class Nutritions extends Model
     public function meals(){
         return $this->hasMany(Meals::class);
     }
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
 }

@@ -24,7 +24,7 @@ class CaptainSubscriptionsController extends Controller
             'captain_id' => auth('api')->user()->Captain->id,
             'duration_in_weeks' => $request->duration_in_weeks,
             'price' => $request->price,
-            'isAvailable' => $request->isAvailable,
+            'isAvailable' => $request->isAvailable ?? true,
         ]);
 
         return response()->json([
@@ -41,30 +41,27 @@ class CaptainSubscriptionsController extends Controller
         CaptainSubscription::where('captain_id', auth('api')->user()->Captain->id)->get();
 
         return response()->json([
-            'price' => $subscriptions->price,
-            'duration_in_weeks' => $subscriptions->duration_in_weeks,
-            'isAvailable' => $subscriptions->isAvailable
+            'subscriptions' => $subscriptions
         ]);
     }
 
 
-    // not finished
-    public function update(Request $request)
+    public function update($id, Request $request)
     {
-        $request->validate([
-
+        $input = $request->validate([
             'duration_in_weeks' => ['integer'],
             'price' => ['integar'],
             'isAvailable' => ['boolean'],
         ]);
 
-        $subscription = CaptainSubscription::where('captain_id', auth('api')->user()->Captain->id)->first();
+        $subscription = CaptainSubscription::find($id)->first();
 
-        $subscription->update([
-            'duration_in_weeks' => $request->duration_in_weeks,
-            'price' => $request->price,
-            'isAvailable' => $request->isAvailable,
-        ]);
+        if ($subscription->captain_id != auth('api')->user()->Captain->id){
+            return response()->json(['error' => 'Subscription not found'], 404);
+        }
+
+        
+        $subscription->update($input);
 
         return response()->json([
             'message' => 'Subscription updated successfully',

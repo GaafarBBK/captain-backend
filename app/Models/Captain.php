@@ -19,6 +19,7 @@ class Captain extends Model
     {
         return $this->belongsTo(User::class);
     }
+ 
     public function subscribers(){
         return $this->hasMany(CaptainSubscribers::class);
     }

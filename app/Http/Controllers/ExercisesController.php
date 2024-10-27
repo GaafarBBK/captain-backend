@@ -15,8 +15,7 @@ class ExercisesController extends Controller
             'description' => ['required', 'string'],
             'target_muscle' => ['required', 'string'],
             'equipment' => ['required', 'string'],
-            'sets' => ['required', 'integer'],
-            'reps' => ['required', 'integer'],
+            'image_url' => ['string'],
             'status' => ['string','in:Pending,Completed'],
             'isPublic' => ['boolean'],
         ]);
@@ -40,7 +39,7 @@ class ExercisesController extends Controller
     }
 
 
-    public function searchExercises(Request $request)
+    public function search(Request $request)
     {
         $request->validate([
             'name' => ['string'],
@@ -62,31 +61,39 @@ class ExercisesController extends Controller
     }
 
 
-    public function attachExercises(Request $request)
+    public function update(Request $request, $id)
     {
-        $workout = Workout::find($request->workout_id);
-        $workout->exercises()->attach($request->exercises_id);
+        $request->validate([
+            'name' => ['string'],
+            'description' => ['string'],
+            'target_muscle' => ['string'],
+            'equipment' => ['string'],
+            'sets' => ['integer'],
+            'reps' => ['integer'],
+            'image_url' => ['string'],
+            'status' => ['string','in:Pending,Completed'],
+            'isPublic' => ['boolean'],
+        ]);
+
+        $exercise = Exercises::find($id);
+
+        if (!$exercise){
+            return response()->json(['error' => 'Exercise not found'], 404);
+        }
+
+        $exercise->update($request->all());
 
         return response()->json([
-            'message' => 'Exercises added to workout successfully',
-            'workout' => $workout
+            'message' => 'Exercise updated successfully',
+            'exercise' => $exercise
         ]);
+
     }
 
 
 
-    public function detachExercises(Request $request)
-    {
-        $workout = Workout::find($request->workout_id);
-        $workout->exercises()->detach($request->exercises_id);
 
-        return response()->json([
-            'message' => 'Exercises removed from workout successfully',
-            'workout' => $workout
-        ]);
-    }
-      
-    
+
     
 
     

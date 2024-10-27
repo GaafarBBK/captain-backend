@@ -18,12 +18,16 @@ class WorkoutController extends Controller
             'user_id' => ['required', 'integer'],
         ]);
 
+        if (!CaptainSubscribers::where('captain_id', auth('api')->user()->Captain->id)->where('user_id', $request->user_id)->first()){
+            return response()->json(['error' => 'User is NOT subscribed to this captain'], 401);
+        }
+
         $workout = Workout::create([
             'user_id' => CaptainSubscribers::where('captain_id', auth('api')->user()->Captain->id)->where('user_id', $request->user_id)->first()->user_id,
             'captain_id' => auth('api')->user()->Captain->id,
             'title' => $request->title,
             'date' => $request->date,
-            'status' => $request->status,
+            'status' => $request->status ?? 'Pending',
         ]);
 
         return response ()->json([
@@ -60,6 +64,35 @@ class WorkoutController extends Controller
 
         return response()->json([
             'message' => 'Workout updated successfully',
+            'workout' => $workout
+        ]);
+    }
+
+    public function attachExercises(Request $request)
+    {
+        $request->validate([
+            'exercises_id' => ['required', 'integer'],
+            'workout_id' => ['required', 'integer'],
+        ]);
+
+        $workout = Workout::find($request->workout_id);
+        $workout->exercises()->attach($request->exercises_id);
+
+        return response()->json([
+            'message' => 'Exercises added to workout successfully',
+            'workout' => $workout
+        ]);
+    }
+
+
+
+    public function detachExercises(Request $request)
+    {
+        $workout = Workout::find($request->workout_id);
+        $workout->exercises()->detach($request->exercises_id);
+
+        return response()->json([
+            'message' => 'Exercises removed from workout successfully',
             'workout' => $workout
         ]);
     }

@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class ExercisesWorkouts extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'exercise_id',
+        'workout_id'
+    ];
 }

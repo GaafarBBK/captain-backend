@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CaptainSubscribers extends Model
 {
-    protected $fillable = ['isActive', 'start_date', 'end_date'];
+    protected $fillable = ['user_id','captain_id','isActive', 'start_date', 'end_date'];
     use HasFactory;
 
     public function captain(){

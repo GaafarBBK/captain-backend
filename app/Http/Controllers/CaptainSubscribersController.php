@@ -31,4 +31,13 @@ class CaptainSubscribersController extends Controller
         return response()->json(['message' => 'Subscription bought successfully'], 201);
 
     }
+
+    public function showSubscribers()
+    {
+        $subscribers = CaptainSubscribers::where('captain_id', auth('api')->user()->Captain->id)->get();
+
+        return response()->json([
+            'subscribers' => $subscribers
+        ]);
+    }
 }

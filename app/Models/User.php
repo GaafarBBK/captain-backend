@@ -32,6 +32,17 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(Captain::class);
     }
+
+    public function workouts()
+    {
+        return $this->hasMany(Workout::class);
+    }
+
+    public function nutritions()
+    {
+        return $this->hasMany(Nutritions::class);
+    }
+
     
     public function dailylogs(){
         return $this->hasMany(DailyLog::class);

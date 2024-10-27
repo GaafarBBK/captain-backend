@@ -105,7 +105,6 @@ class UserController extends Controller
    public function getUser()
    {
         return response()-> json([
-            'role' => auth('api')->user()->captain() ? 'captain':'athelete',
             'user info' => auth('api')->user(),
             
         ]);
@@ -115,7 +114,7 @@ class UserController extends Controller
 
    public function logout()
    {
-         auth('api')->logout();
+         auth('api')->logout(true);
          return response()->json(['message' => 'User logged out successfully'], 200);
    }
 
