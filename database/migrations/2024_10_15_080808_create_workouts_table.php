@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('workouts', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Captain::class);
+            $table->foreignIdFor(Captain::class)->nullable();
             $table->foreignIdFor(User::class);
             $table->string('title');
             $table->date('date');

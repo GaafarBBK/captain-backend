@@ -48,11 +48,25 @@ class ExercisesController extends Controller
             'isPublic' => ['boolean'],
         ]);
 
-        $exercises = Exercises::where('name', 'like', '%'.$request->name.'%')
-            ->where('target_muscle', 'like', '%'.$request->target_muscle.'%')
-            ->where('equipment', 'like', '%'.$request->equipment.'%')
-            ->where('isPublic', $request->isPublic)
-            ->get();
+        $query = Exercises::query();
+
+        if ($request->has('name')) {
+            $query->where('name', 'like', '%'.$request->name.'%');
+        }
+
+        if ($request->has('target_muscle')) {
+            $query->orWhere('target_muscle', 'like', '%'.$request->target_muscle.'%');
+        }
+
+        if ($request->has('equipment')) {
+            $query->orWhere('equipment', 'like', '%'.$request->equipment.'%');
+        }
+
+        if ($request->has('isPublic')) {
+            $query->orWhere('isPublic', $request->isPublic);
+        }
+
+    $exercises = $query->get();
 
         return response()->json([
             'exercises' => $exercises

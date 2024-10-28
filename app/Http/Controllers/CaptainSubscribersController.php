@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CaptainSubscribers;
 use App\Models\CaptainSubscription;
 use Illuminate\Http\Request;
+Use App\Models\User;
 
 class CaptainSubscribersController extends Controller
 {
@@ -33,8 +34,10 @@ class CaptainSubscribersController extends Controller
     }
 
     public function showSubscribers()
-    {
-        $subscribers = CaptainSubscribers::where('captain_id', auth('api')->user()->Captain->id)->get();
+     {
+        $subscribers = CaptainSubscribers::where('captain_id', auth('api')->user()->Captain->id)->pluck('user_id');
+
+        $users = User::where('id', $subscribers)->get();
 
         return response()->json([
             'subscribers' => $subscribers

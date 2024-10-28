@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Exercises;
+use App\Models\Workout;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,6 +16,7 @@ return new class extends Migration
         Schema::create('sets', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Exercises::class);
+            $table->foreignIdFor(Workout::class);
             $table->integer('set_no');
             $table->integer('reps');
             $table->integer('weight')->nullable();

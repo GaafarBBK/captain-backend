@@ -30,7 +30,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get("sub/listUsers",[CaptainSubscribersController::class,"showSubscribers"]);
 
     Route::post("workout/create",[WorkoutController::class,"create"]);
-    Route::get("workout/show",[WorkoutController::class,"show"]);
+    Route::get("workout/show",[WorkoutController::class,"showWorkout"]);
     Route::put("workout/update",[WorkoutController::class,"updateWorkout"]);
     Route::post("workout/addExercises",[WorkoutController::class,"attachExercises"]);
     Route::delete("workout/removeExercises",[WorkoutController::class,"detachExercises"]);

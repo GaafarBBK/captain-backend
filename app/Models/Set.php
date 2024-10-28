@@ -21,4 +21,8 @@ class Set extends Model
     public function exercise(){
         return $this->belongsTo(Exercises::class);
     }
+
+    public function workout(){
+        return $this->belongsTo(Workout::class);
+    }
 }

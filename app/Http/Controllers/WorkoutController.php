@@ -15,16 +15,53 @@ class WorkoutController extends Controller
             'date' => ['required', 'date'],
             'status' => ['string','in:Pending,Completed'],
 
-            'user_id' => ['required', 'integer'],
+            'user_id' => ['integer'],
         ]);
 
-        if (!CaptainSubscribers::where('captain_id', auth('api')->user()->Captain->id)->where('user_id', $request->user_id)->first()){
-            return response()->json(['error' => 'User is NOT subscribed to this captain'], 401);
+        // if user_id is provided, then the captain is creating a workout for an athlete
+        if ($request->user_id)
+        {
+            $userSubscribed = CaptainSubscribers::where('captain_id', auth('api')->user()->Captain->id)
+                                                ->where('user_id', $request->user_id)
+                                                ->first();
+
+            if (!$userSubscribed || !$userSubscribed->isActive)
+            {
+                return response()->json(['error' => 'Athlete is NOT subscribed to this captain.'], 401);
+            }
+
+            if (Workout::where('user_id', $userSubscribed->user_id)
+                        ->where('date', $request->date)
+                        ->first())
+            {
+                return response()->json(['error' => 'Workout already exists for this user on this date.'], 401);
+            }
+
+            $workout = Workout::create([
+                'user_id' => $request->user_id,
+                'captain_id' => auth('api')->user()->Captain->id,
+                'title' => $request->title,
+                'date' => $request->date,
+                'status' => $request->status ?? 'Pending',
+            ]);
+
+            return response ()->json([
+                'message' => 'Workout created successfully',
+                'workout' => $workout
+            ], 201);
+        }
+       
+        // if user_id is not provided, then the athlete is creating a workout for himself
+        if (Workout::where('user_id', auth('api')->user()->id)
+                    ->where('date', $request->date)
+                    ->first())
+        {
+            return response()->json(['error' => 'Workout already exists for this user on this date.'], 401);
         }
 
         $workout = Workout::create([
-            'user_id' => CaptainSubscribers::where('captain_id', auth('api')->user()->Captain->id)->where('user_id', $request->user_id)->first()->user_id,
-            'captain_id' => auth('api')->user()->Captain->id,
+            'user_id' => auth('api')->user()->id,
+            'captain_id' => auth('api')->user()->Captain->id ?? null,
             'title' => $request->title,
             'date' => $request->date,
             'status' => $request->status ?? 'Pending',
@@ -38,9 +75,15 @@ class WorkoutController extends Controller
 
     
 
-    public function show()
+    public function showWorkout(Request $request)
     {
-        $workout = Workout::where('user_id', auth('api')->user()->id)->get();
+        $request->validate([
+            'date' => ['date'],
+        ]);
+
+        $workout = Workout::where('user_id', auth('api')->user()->id)
+                            ->where('date', $request->date)
+                            ->get();
 
         return response()->json([
             'workout' => $workout
@@ -53,9 +96,52 @@ class WorkoutController extends Controller
             'title' => ['string'],
             'date' => ['date'],
             'status' => ['string','in:Pending,Completed'],
+            'user_id' => ['integer'],
         ]);
 
-        $workout = Workout::find($request->workout_id);
+        if ($request->user_id)
+        {
+            $userSubscribed = 
+            CaptainSubscribers::where('captain_id', auth('api')->user()->Captain->id)
+                                ->where('user_id', $request->user_id)
+                                ->first();
+
+            if (!$userSubscribed || !$userSubscribed->isActive)
+            {
+                return response()->json(['error' => 'Athlete is NOT subscribed to this captain.'], 401);
+            }
+        
+            $workout = Workout::where('user_id', $request->user_id)
+                            ->where('date', $request->date)
+                            ->first();
+
+            if (!$workout)
+            {
+                return response()->json(['error' => 'Workout not found'], 404);
+            }
+
+            $workout->update([
+                'title' => $request->title,
+                'date' => $request->date,
+                'status' => $request->status,
+            ]);
+
+            return response()->json([
+                'message' => 'Workout updated successfully.',
+                'workout' => $workout
+            ], 201);
+        }
+        
+        
+        $workout = Workout::where('user_id', auth('api')->user()->id)
+                            ->where('date', $request->date)
+                            ->first();
+
+        if (!$workout)
+        {
+            return response()->json(['error' => 'Workout not found'], 404);
+        }
+        
         $workout->update([
             'title' => $request->title,
             'date' => $request->date,
@@ -63,8 +149,19 @@ class WorkoutController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Workout updated successfully',
+            'message' => 'Workout updated successfully.',
             'workout' => $workout
+        ], 201);
+    }
+
+    // not finished
+    public function deleteWorkout(Request $request)
+    {
+        $workout = Workout::find($request->workout_id);
+        $workout->delete();
+
+        return response()->json([
+            'message' => 'Workout deleted successfully',
         ]);
     }
 
@@ -72,30 +169,63 @@ class WorkoutController extends Controller
     {
         $request->validate([
             'exercises_id' => ['required', 'integer'],
-            'workout_id' => ['required', 'integer'],
+            'date' => ['required', 'date'],
+            'user_id' => ['integer'],
         ]);
 
-        $workout = Workout::find($request->workout_id);
+        $workout = Workout::where('user_id', auth('api')->user()->id)
+                            ->orWhere('user_id', $request->user_id)
+                            ->where('date', $request->date)
+                            ->first();
+
+        if (!$workout)
+        {
+            return response()->json(['error' => 'Workout not found'], 404);
+        }
+
         $workout->exercises()->attach($request->exercises_id);
 
         return response()->json([
-            'message' => 'Exercises added to workout successfully',
+            'message' => 'Exercises added to workout successfully.',
             'workout' => $workout
-        ]);
+        ], 201);
     }
 
 
-
+    // not finished.. need to add date instead of workout_id
     public function detachExercises(Request $request)
     {
         $workout = Workout::find($request->workout_id);
         $workout->exercises()->detach($request->exercises_id);
 
         return response()->json([
-            'message' => 'Exercises removed from workout successfully',
+            'message' => 'Exercises removed from workout successfully.',
             'workout' => $workout
-        ]);
+        ], 201);
     }
    
    
+    public function showExercises(Request $request)
+    {
+        $request->validate([
+            'date' => ['date'],
+            'user_id' => ['integer'],
+        ]);
+
+        $workout = Workout::where('user_id', auth('api')->user()->id)
+                            ->orWhere('user_id', $request->user_id)
+                            ->where('date', $request->date)
+                            ->first();
+
+        if (!$workout)
+        {
+            return response()->json(['error' => 'Workout not found'], 404);
+        }
+
+        $exercises = $workout->exercises;
+
+        return response()->json([
+            'exercises' => $exercises
+        ]);
+    }
 }

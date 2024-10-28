@@ -22,4 +22,8 @@ class Workout extends Model
     public function captain(){
         return $this->belongsTo(Captain::class);
     }
+
+    public function sets(){
+        return $this->hasMany(Set::class);
+    }
 }
