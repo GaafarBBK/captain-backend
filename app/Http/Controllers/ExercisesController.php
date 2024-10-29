@@ -32,7 +32,7 @@ class ExercisesController extends Controller
         ]);
 
         return response ()->json([
-            'message' => 'Exercise created successfully',
+            'message' => 'Exercise created successfully. ',
             'exercise' => $exercise
         ], 201);
 
@@ -70,7 +70,7 @@ class ExercisesController extends Controller
 
         return response()->json([
             'exercises' => $exercises
-        ]);
+        ], 200);
 
     }
 
@@ -98,9 +98,9 @@ class ExercisesController extends Controller
         $exercise->update($request->all());
 
         return response()->json([
-            'message' => 'Exercise updated successfully',
+            'message' => 'Exercise updated successfully.',
             'exercise' => $exercise
-        ]);
+        ], 201);
 
     }
 

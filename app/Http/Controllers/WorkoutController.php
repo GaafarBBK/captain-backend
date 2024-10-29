@@ -8,6 +8,30 @@ use Illuminate\Http\Request;
 
 class WorkoutController extends Controller
 {
+
+    // apply these two functions to the rest of the functions for better code
+    public function isSubActive($user_id)
+    {
+        $userSubscribed = CaptainSubscribers::where('captain_id', auth('api')->user()->Captain->id)
+                                            ->where('user_id', $user_id)
+                                            ->first();
+
+        if (!$userSubscribed || !$userSubscribed->isActive)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function findWorkoutByDate($date, $user_id)
+    {
+        $workout = Workout::where('user_id', $user_id)
+                            ->where('date', $date)
+                            ->first();
+
+        return $workout;
+    }
     public function create(Request $request)
     {
         $request->validate([
@@ -21,18 +45,12 @@ class WorkoutController extends Controller
         // if user_id is provided, then the captain is creating a workout for an athlete
         if ($request->user_id)
         {
-            $userSubscribed = CaptainSubscribers::where('captain_id', auth('api')->user()->Captain->id)
-                                                ->where('user_id', $request->user_id)
-                                                ->first();
-
-            if (!$userSubscribed || !$userSubscribed->isActive)
+            if(!$this->isSubActive($request->user_id))
             {
                 return response()->json(['error' => 'Athlete is NOT subscribed to this captain.'], 401);
             }
-
-            if (Workout::where('user_id', $userSubscribed->user_id)
-                        ->where('date', $request->date)
-                        ->first())
+            
+            if ($this->findWorkoutByDate($request->date, $request->user_id))
             {
                 return response()->json(['error' => 'Workout already exists for this user on this date.'], 401);
             }
@@ -52,9 +70,7 @@ class WorkoutController extends Controller
         }
        
         // if user_id is not provided, then the athlete is creating a workout for himself
-        if (Workout::where('user_id', auth('api')->user()->id)
-                    ->where('date', $request->date)
-                    ->first())
+        if ($this->findWorkoutByDate($request->date, auth('api')->user()->id))
         {
             return response()->json(['error' => 'Workout already exists for this user on this date.'], 401);
         }
@@ -81,9 +97,7 @@ class WorkoutController extends Controller
             'date' => ['date'],
         ]);
 
-        $workout = Workout::where('user_id', auth('api')->user()->id)
-                            ->where('date', $request->date)
-                            ->get();
+        $workout = $this->findWorkoutByDate($request->date, auth('api')->user()->id);
 
         return response()->json([
             'workout' => $workout
@@ -195,7 +209,20 @@ class WorkoutController extends Controller
     // not finished.. need to add date instead of workout_id
     public function detachExercises(Request $request)
     {
-        $workout = Workout::find($request->workout_id);
+        $request->validate([
+            'exercises_id' => ['required', 'integer'],
+            'date' => ['required', 'date'],
+            'user_id' => ['integer'],
+        ]);
+        $workout = Workout::where('user_id', auth('api')->user()->id)
+                            ->orWhere('user_id', $request->user_id)
+                            ->where('date', $request->date)
+                            ->first();
+        if (!$workout)
+        {
+            return response()->json(['error' => 'Workout not found'], 404);
+        }
+
         $workout->exercises()->detach($request->exercises_id);
 
         return response()->json([
