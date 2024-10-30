@@ -27,12 +27,12 @@ class ExercisesController extends Controller
             'equipment' => $request->equipment,
             'sets' => $request->sets,
             'reps' => $request->reps,
-            'status' => $request->status,
-            'isPublic' => $request->isPublic,
+            'status' => $request->status ?? 'Pending',
+            'isPublic' => $request->isPublic ?? true,
         ]);
 
         return response ()->json([
-            'message' => 'Exercise created successfully. ',
+            'message' => 'Exercise created successfully.',
             'exercise' => $exercise
         ], 201);
 
@@ -66,7 +66,11 @@ class ExercisesController extends Controller
             $query->orWhere('isPublic', $request->isPublic);
         }
 
-    $exercises = $query->get();
+        $exercises = $query->get();
+    
+        // if ($exercises->isPublic == 0){
+        //     return response()->json(['error' => 'Exercise not found'], 404);
+        // }
 
         return response()->json([
             'exercises' => $exercises

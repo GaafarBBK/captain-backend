@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class DailyLog extends Model
 {
-    protected $fillable = ['day_date', 'steps','calories'];
+    protected $fillable = ['user_id','day_date', 'steps','calories'];
     use HasFactory;
 
     public function athlete(){

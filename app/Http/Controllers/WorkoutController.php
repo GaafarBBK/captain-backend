@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CaptainSubscribers;
+use App\Models\Exercises;
 use App\Models\Workout;
 use Illuminate\Http\Request;
 
@@ -94,10 +95,19 @@ class WorkoutController extends Controller
     public function showWorkout(Request $request)
     {
         $request->validate([
-            'date' => ['date'],
+            'date' => ['required','date'],
+            'user_id' => ['integer'],
         ]);
+        
+        if(!$request->user_id)
+        {
+            $workout = $this->findWorkoutByDate($request->date, auth('api')->user()->id);
 
-        $workout = $this->findWorkoutByDate($request->date, auth('api')->user()->id);
+            return response()->json([
+                'workout' => $workout
+            ]);
+        }
+        $workout = $this->findWorkoutByDate($request->date, $request->user_id);
 
         return response()->json([
             'workout' => $workout
@@ -106,9 +116,11 @@ class WorkoutController extends Controller
 
     public function updateWorkout(Request $request)
     {
-        $request->validate([
-            'title' => ['string'],
+       
+        $newData = $request->validate([
+            'currentDate' => ['required','date'],
             'date' => ['date'],
+            'title' => ['string'],
             'status' => ['string','in:Pending,Completed'],
             'user_id' => ['integer'],
         ]);
@@ -126,7 +138,7 @@ class WorkoutController extends Controller
             }
         
             $workout = Workout::where('user_id', $request->user_id)
-                            ->where('date', $request->date)
+                            ->where('date', $request->currentDate)
                             ->first();
 
             if (!$workout)
@@ -134,11 +146,7 @@ class WorkoutController extends Controller
                 return response()->json(['error' => 'Workout not found'], 404);
             }
 
-            $workout->update([
-                'title' => $request->title,
-                'date' => $request->date,
-                'status' => $request->status,
-            ]);
+            $workout->update($newData);
 
             return response()->json([
                 'message' => 'Workout updated successfully.',
@@ -148,7 +156,7 @@ class WorkoutController extends Controller
         
         
         $workout = Workout::where('user_id', auth('api')->user()->id)
-                            ->where('date', $request->date)
+                            ->where('date', $request->currentDate)
                             ->first();
 
         if (!$workout)
@@ -156,11 +164,7 @@ class WorkoutController extends Controller
             return response()->json(['error' => 'Workout not found'], 404);
         }
         
-        $workout->update([
-            'title' => $request->title,
-            'date' => $request->date,
-            'status' => $request->status,
-        ]);
+        $workout->update($newData);
 
         return response()->json([
             'message' => 'Workout updated successfully.',
@@ -179,13 +183,17 @@ class WorkoutController extends Controller
         ]);
     }
 
+
+    // captain adding workout is not finished
     public function attachExercises(Request $request)
     {
         $request->validate([
-            'exercises_id' => ['required', 'integer'],
+            'exercises_name' => ['required', 'string'],
             'date' => ['required', 'date'],
             'user_id' => ['integer'],
         ]);
+
+        $exercise = Exercises::where('name', $request->exercises_name)->first()->id;
 
         $workout = Workout::where('user_id', auth('api')->user()->id)
                             ->orWhere('user_id', $request->user_id)
@@ -197,11 +205,11 @@ class WorkoutController extends Controller
             return response()->json(['error' => 'Workout not found'], 404);
         }
 
-        $workout->exercises()->attach($request->exercises_id);
+        $workout->exercises()->attach($exercise);
 
         return response()->json([
             'message' => 'Exercises added to workout successfully.',
-            'workout' => $workout
+            'workout' => $workout->exercises
         ], 201);
     }
 
@@ -210,10 +218,13 @@ class WorkoutController extends Controller
     public function detachExercises(Request $request)
     {
         $request->validate([
-            'exercises_id' => ['required', 'integer'],
+            'exercises_name' => ['required', 'string'],
             'date' => ['required', 'date'],
             'user_id' => ['integer'],
         ]);
+
+        $exercise = Exercises::where('name', $request->exercises_name)->first()->id;
+
         $workout = Workout::where('user_id', auth('api')->user()->id)
                             ->orWhere('user_id', $request->user_id)
                             ->where('date', $request->date)
@@ -223,11 +234,11 @@ class WorkoutController extends Controller
             return response()->json(['error' => 'Workout not found'], 404);
         }
 
-        $workout->exercises()->detach($request->exercises_id);
+        $workout->exercises()->detach($exercise);
 
         return response()->json([
             'message' => 'Exercises removed from workout successfully.',
-            'workout' => $workout
+            'workout' => $workout->exercises
         ], 201);
     }
    
@@ -235,12 +246,14 @@ class WorkoutController extends Controller
     public function showExercises(Request $request)
     {
         $request->validate([
-            'date' => ['date'],
+            'date' => ['required', 'date'],
             'user_id' => ['integer'],
         ]);
 
-        $workout = Workout::where('user_id', auth('api')->user()->id)
-                            ->orWhere('user_id', $request->user_id)
+        $workout = Workout::where(function($query) use ($request) {
+                                $query->where('user_id', auth('api')->user()->id)
+                                      ->orWhere('user_id', $request->user_id);
+                            })
                             ->where('date', $request->date)
                             ->first();
 
@@ -249,9 +262,10 @@ class WorkoutController extends Controller
             return response()->json(['error' => 'Workout not found'], 404);
         }
 
-        $exercises = $workout->exercises;
+        $exercises = $workout->exercises()->with('sets')->get(['name', 'status'])->makeHidden('pivot');
 
         return response()->json([
+            'workout_date' => $workout->date,
             'exercises' => $exercises
         ]);
     }

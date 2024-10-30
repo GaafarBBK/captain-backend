@@ -40,7 +40,7 @@ class CaptainSubscribersController extends Controller
         $users = User::where('id', $subscribers)->get();
 
         return response()->json([
-            'subscribers' => $subscribers
+            'subscribers' => $users
         ]);
     }
 }
