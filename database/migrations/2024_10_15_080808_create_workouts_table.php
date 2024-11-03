@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Captain::class)->nullable();
             $table->foreignIdFor(User::class);
-            $table->string('title');
+            $table->string('title')->nullable();
             $table->date('date');
             $table->enum('status', ['Pending','Completed'])->default('Pending');
             

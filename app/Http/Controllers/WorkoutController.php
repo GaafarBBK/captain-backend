@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 class WorkoutController extends Controller
 {
 
-    // apply these two functions to the rest of the functions for better code
     public function isSubActive($user_id)
     {
         $userSubscribed = CaptainSubscribers::where('captain_id', auth('api')->user()->Captain->id)
@@ -36,7 +35,7 @@ class WorkoutController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'title' => ['required', 'string'],
+            'title' => ['string'],
             'date' => ['required', 'date'],
             'status' => ['string','in:Pending,Completed'],
 
@@ -127,12 +126,8 @@ class WorkoutController extends Controller
 
         if ($request->user_id)
         {
-            $userSubscribed = 
-            CaptainSubscribers::where('captain_id', auth('api')->user()->Captain->id)
-                                ->where('user_id', $request->user_id)
-                                ->first();
-
-            if (!$userSubscribed || !$userSubscribed->isActive)
+            
+            if(!$this->isSubActive($request->user_id))
             {
                 return response()->json(['error' => 'Athlete is NOT subscribed to this captain.'], 401);
             }
@@ -155,9 +150,7 @@ class WorkoutController extends Controller
         }
         
         
-        $workout = Workout::where('user_id', auth('api')->user()->id)
-                            ->where('date', $request->currentDate)
-                            ->first();
+        $workout = $this->findWorkoutByDate($request->currentDate, auth('api')->user()->id);
 
         if (!$workout)
         {
@@ -172,6 +165,7 @@ class WorkoutController extends Controller
         ], 201);
     }
 
+
     // not finished
     public function deleteWorkout(Request $request)
     {
@@ -184,7 +178,6 @@ class WorkoutController extends Controller
     }
 
 
-    // captain adding workout is not finished
     public function attachExercises(Request $request)
     {
         $request->validate([
@@ -194,6 +187,8 @@ class WorkoutController extends Controller
         ]);
 
         $exercise = Exercises::where('name', $request->exercises_name)->first()->id;
+
+        
 
         $workout = Workout::where('user_id', auth('api')->user()->id)
                             ->orWhere('user_id', $request->user_id)
@@ -213,8 +208,6 @@ class WorkoutController extends Controller
         ], 201);
     }
 
-
-    // not finished.. need to add date instead of workout_id
     public function detachExercises(Request $request)
     {
         $request->validate([

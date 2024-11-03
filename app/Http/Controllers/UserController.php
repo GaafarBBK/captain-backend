@@ -21,13 +21,14 @@ class UserController extends Controller
         
         $credentials = request(['email', 'password']);
         if(!$token = auth()->attempt($credentials)){
-            return response()->json(['status'=> 'error']);
+            return response()->json(['status'=> 'error'], 401);
+            
         }
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60
-        ]);
+        ], 200);
     }
 
 
